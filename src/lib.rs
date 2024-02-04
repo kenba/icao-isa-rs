@@ -18,6 +18,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+//! [![crates.io](https://img.shields.io/crates/v/icao-isa.svg)](https://crates.io/crates/icao-isa)
+//! [![docs.io](https://docs.rs/icao-isa/badge.svg)](https://docs.rs/icao-isa/)
 //! [![License](https://img.shields.io/badge/License-MIT-blue)](https://opensource.org/license/mit/)
 //! [![Rust](https://github.com/kenba/icao-isa-rs/actions/workflows/rust.yml/badge.svg)](https://github.com/kenba/icao-isa-rs/actions)
 //! [![codecov](https://codecov.io/gh/kenba/icao-isa-rs/graph/badge.svg?token=6DTOY9Y4BT)](https://codecov.io/gh/kenba/icao-isa-rs)
@@ -407,16 +409,6 @@ mod tests {
                     .0
             ) < 0.001
         );
-
-        // assert_eq!(
-        //     164.45789485774137,
-        //     calculate_true_air_speed(
-        //         MetresPerSecond(150.0),
-        //         Pascals(79495.201),
-        //         Kelvin(constants::SEA_LEVEL_TEMPERATURE.0 - 13.0)
-        //     )
-        //     .0
-        // );
     }
 
     #[test]

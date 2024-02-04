@@ -1,5 +1,7 @@
 # icao-isa
 
+[![crates.io](https://img.shields.io/crates/v/icao-isa.svg)](https://crates.io/crates/icao-isa)
+[![docs.io](https://docs.rs/icao-isa/badge.svg)](https://docs.rs/icao-isa/)
 [![License](https://img.shields.io/badge/License-MIT-blue)](https://opensource.org/license/mit/)
 [![Rust](https://github.com/kenba/icao-isa-rs/actions/workflows/rust.yml/badge.svg)](https://github.com/kenba/icao-isa-rs/actions)
 [![codecov](https://codecov.io/gh/kenba/icao-isa-rs/graph/badge.svg?token=6DTOY9Y4BT)](https://codecov.io/gh/kenba/icao-isa-rs)
