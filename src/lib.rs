@@ -24,19 +24,24 @@
 //! [![Rust](https://github.com/kenba/icao-isa-rs/actions/workflows/rust.yml/badge.svg)](https://github.com/kenba/icao-isa-rs/actions)
 //! [![codecov](https://codecov.io/gh/kenba/icao-isa-rs/graph/badge.svg?token=6DTOY9Y4BT)](https://codecov.io/gh/kenba/icao-isa-rs)
 //!
-//! An implementation of the ICAO [International Standard Atmosphere](https://en.wikipedia.org/wiki/International_Standard_Atmosphere)
+//! An implementation of the [International Civil Aviation Organization](https://icao.int/) (ICAO)
+//! [International Standard Atmosphere](https://en.wikipedia.org/wiki/International_Standard_Atmosphere)
 //! (ISA), see [ICAO Doc 7488/3](https://standart.aero/en/icao/book/doc-7488-manual-of-the-icao-standard-atmosphere-extended-to-80-kilometres-262-500-feet-en-cons).
 //!
 //! The library also includes functions for calculating:
 //!
-//! - true air speed (TAS) from calibrated air speed (CAS), pressure and temperature;
+//! - true airspeed ([TAS](https://en.wikipedia.org/wiki/True_airspeed)) from calibrated airspeed ([CAS](https://en.wikipedia.org/wiki/Calibrated_airspeed)), pressure and temperature;
 //! - CAS from TAS, pressure and temperature;
-//! - TAS from MACH number and temperature;
-//! - and the crossover altitude for CAS / MACH speed pairs.
+//! - TAS from [Mach number](https://en.wikipedia.org/wiki/Mach_number) and temperature;
+//! - and the crossover altitude between CAS / MACH flight regimes.
 //!
 //! The equations for the functions above are from
 //! [BADA User Manual revision 3-12](https://www.scribd.com/document/289480324/1-User-Manual-Bada-3-12).
+//! 
+//! The library is declared [no_std](https://docs.rust-embedded.org/book/intro/no-std.html)
+//! so it can be used in embedded applications.
 
+#![cfg_attr(not(test), no_std)]
 #![allow(clippy::suboptimal_flops)]
 
 pub mod constants;

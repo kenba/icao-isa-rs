@@ -7,8 +7,8 @@ documentation = "https://docs.rs/icao-isa/"
 homepage = "https://github.com/kenba/icao-isa-rs"
 repository = "https://github.com/kenba/icao-isa-rs"
 readme = "README.md"
-keywords = ["icao", "isa", "mach", "tas", "cas"]
-categories = ["aerospace"]
+keywords = ["icao", "isa", "airspeed", "mach", "tas", "cas"]
+categories = ["aerospace", "science::geo", "no-std"]
 license = "MIT"
 edition = "2021"
 
