@@ -1,13 +1,13 @@
 [package]
 name = "icao-isa"
-version = "0.1.1"
+version = "0.1.2"
 authors = ["Ken Barker <ken.barker@via-technology.aero>"]
 description = "An implementation of the ICAO International Standard Atmosphere(ISA) and air speed equations."
 documentation = "https://docs.rs/icao-isa/"
 homepage = "https://github.com/kenba/icao-isa-rs"
 repository = "https://github.com/kenba/icao-isa-rs"
 readme = "README.md"
-keywords = ["icao", "isa", "airspeed", "mach", "tas", "cas"]
+keywords = ["icao", "isa", "mach", "tas", "cas"]
 categories = ["aerospace", "science::geo", "no-std"]
 license = "MIT"
 edition = "2021"
