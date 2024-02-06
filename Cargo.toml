@@ -1,6 +1,6 @@
 [package]
 name = "icao-isa"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["Ken Barker <ken.barker@via-technology.aero>"]
 description = "An implementation of the ICAO International Standard Atmosphere(ISA) and air speed equations."
 documentation = "https://docs.rs/icao-isa/"
