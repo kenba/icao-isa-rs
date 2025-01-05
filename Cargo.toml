@@ -1,6 +1,6 @@
 [package]
 name = "icao-isa"
-version = "0.1.2"
+version = "0.2.0"
 authors = ["Ken Barker <ken.barker@via-technology.aero>"]
 description = "An implementation of the ICAO International Standard Atmosphere(ISA) and air speed equations."
 documentation = "https://docs.rs/icao-isa/"
@@ -14,7 +14,7 @@ edition = "2021"
 
 [dependencies]
 libm = "0.2"
-icao-units = "0.1"
+icao-units = "0.2"
 
 [lints.rust]
 unsafe_code = "forbid"
