@@ -37,7 +37,7 @@
 //!
 //! The equations for the functions above are from
 //! [BADA User Manual revision 3-12](https://www.scribd.com/document/289480324/1-User-Manual-Bada-3-12).
-//! 
+//!
 //! The library is declared [no_std](https://docs.rust-embedded.org/book/intro/no-std.html)
 //! so it can be used in embedded applications.
 

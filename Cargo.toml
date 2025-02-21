@@ -10,11 +10,11 @@ readme = "README.md"
 keywords = ["icao", "isa", "mach", "tas", "cas"]
 categories = ["aerospace", "science::geo", "no-std"]
 license = "MIT"
-edition = "2021"
+edition = "2024"
 
 [dependencies]
 libm = "0.2"
-icao-units = "0.2"
+icao-units = "1.0"
 
 [lints.rust]
 unsafe_code = "forbid"
