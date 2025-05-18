@@ -75,7 +75,8 @@ const TROPOPAUSE_PRESSURE: Pascals = Pascals(22_632.040_095_007_81);
 const TROPOPAUSE_PRESSURE_FACTOR: f64 =
     -constants::g.0 / (constants::R * constants::TROPOPAUSE_TEMPERATURE.0);
 
-/// Calculate the ISA pressure below the tropopause for the given altitude.  
+/// Calculate the ISA pressure below the tropopause for the given altitude.
+///
 /// See BADA Rev 3.12, Eq 3.1-18
 /// * `altitude` the altitude in Metres: max tropopause - `11_000` metres.
 ///
@@ -92,7 +93,8 @@ fn calculate_troposphere_pressure(altitude: Metres) -> Pascals {
     )
 }
 
-/// Calculate the ISA pressure in the tropopause for the given altitude.  
+/// Calculate the ISA pressure in the tropopause for the given altitude.
+///
 /// See BADA Rev 3.12, Eq 3.1-20
 /// * `altitude` the altitude in Metres: min tropopause - `11_000` metres.
 ///
@@ -107,8 +109,9 @@ fn calculate_tropopause_pressure(altitude: Metres) -> Pascals {
     )
 }
 
-/// Calculate the ISA pressure corresponding to the given altitude.  
-/// Note: ISA pressure does **NOT** vary with temperature.  
+/// Calculate the ISA pressure corresponding to the given altitude.
+///
+/// Note: ISA pressure does **NOT** vary with temperature.
 /// See BADA Rev 3.12, Eq 3.1-18 & Eq 3.1-20
 /// * `altitude` the pressure altitude in metres.
 ///
@@ -122,7 +125,8 @@ pub fn calculate_isa_pressure(altitude: Metres) -> Pascals {
     }
 }
 
-/// Calculate the altitude corresponding to the given pressure below the tropopause.  
+/// Calculate the altitude corresponding to the given pressure below the tropopause.
+///
 /// See BADA Rev 3.12, Eq 3.1-18
 /// * `pressure` the pressure in Pascals.
 ///
@@ -134,7 +138,8 @@ fn calculate_troposphere_altitude(pressure: Pascals) -> Metres {
     Metres(altitude_ratio * constants::SEA_LEVEL_TEMPERATURE.0 / constants::TEMPERATURE_GRADIENT)
 }
 
-/// Calculate the altitude corresponding to the given pressure in the tropopause.  
+/// Calculate the altitude corresponding to the given pressure in the tropopause.
+///
 /// See BADA Rev 3.12, Eq 3.1-20
 /// * `pressure` the pressure in Pascals.
 ///
@@ -145,7 +150,8 @@ fn calculate_tropopause_altitude(pressure: Pascals) -> Metres {
     Metres(constants::TROPOPAUSE_ALTITUDE.0 + altitude_delta)
 }
 
-/// Calculate the ISA altitude corresponding to the given pressure.  
+/// Calculate the ISA altitude corresponding to the given pressure.
+///
 /// See BADA Rev 3.12, Eq 3.1-18 & Eq 3.1-20
 /// * `altitude` the pressure altitude in metres.
 ///
@@ -160,7 +166,8 @@ pub fn calculate_isa_altitude(pressure: Pascals) -> Metres {
 }
 
 /// Calculate the ISA temperature corresponding to the given altitude and
-/// difference in Sea level temperature.  
+/// difference in Sea level temperature.
+///
 /// See ICAO Doc 7488/3, Eq (11)
 /// * `altitude` the altitude in Metres.
 /// * `delta_temperature` the difference from ISA temperature at Sea level.
@@ -181,8 +188,9 @@ pub fn calculate_isa_temperature(altitude: Metres, delta_temperature: Kelvin) ->
     }
 }
 
-/// Calculate the air density given the air temperature and pressure.  
-/// Uses the Ideal Gas Equation (Boyles law)  
+/// Calculate the air density given the air temperature and pressure.\
+/// Uses the Ideal Gas Equation (Boyles law)
+///
 /// See See ICAO Doc 7488/3, Eq (3).
 /// * `pressure` the pressure in Pascals.
 /// * `temperature` the temperature in Kelvin.
@@ -194,7 +202,8 @@ pub fn calculate_density(pressure: Pascals, temperature: Kelvin) -> KilogramsPer
 }
 
 /// Calculate the True Air Speed (TAS) from the Calibrated Air Speed (CAS)
-/// at the given pressure and temperature.  
+/// at the given pressure and temperature.
+///
 /// See BADA Rev 3.12, Eq 3.1.23
 /// * `cas` the Calibrated Air Speed in metres per second.
 /// * `pressure` the pressure in Pascals.
@@ -221,7 +230,8 @@ pub fn calculate_true_air_speed(
 }
 
 /// Calculate the Calibrated Air Speed (CAS) from the True Air Speed (TAS)
-/// at the given pressure and temperature.  
+/// at the given pressure and temperature.
+///
 /// See BADA Rev 3.12, Eq 3.1.24
 /// * `tas` the True Air Speed in metres per second.
 /// * `pressure` the pressure in Pascals.
@@ -246,7 +256,8 @@ pub fn calculate_calibrated_air_speed(
     MetresPerSecond(libm::sqrt(OUTER_FACTOR * tas_pressure_factor))
 }
 
-/// Calculate the speed of sound for the given temperature.  
+/// Calculate the speed of sound for the given temperature.
+///
 /// See ICAO Doc 7488/3, Eq 21
 /// * `temperature` the temperature in Kelvin.
 ///
@@ -256,7 +267,8 @@ pub fn speed_of_sound(temperature: Kelvin) -> MetresPerSecond {
     MetresPerSecond(libm::sqrt(constants::K * constants::R * temperature.0))
 }
 
-/// Calculate the True Air Speed (TAS) from the Mach number at the given temperature.  
+/// Calculate the True Air Speed (TAS) from the Mach number at the given temperature.
+///
 /// See BADA Rev 3.12, Eq 3.1.22
 /// * `mach` the Mach number.
 /// * `temperature` the temperature in Kelvin.
@@ -268,7 +280,8 @@ pub fn mach_true_air_speed(mach: f64, temperature: Kelvin) -> MetresPerSecond {
 }
 
 /// This function calculates the crossover pressure ratio between the
-/// Calibrated Air Speed (CAS) and Mach number.  
+/// Calibrated Air Speed (CAS) and Mach number.
+///
 /// See BADA Rev 3.12, Eq 3.1-29
 /// * `cas` the Calibrated Air Speed in metres per second.
 /// * `mach` the Mach number.
@@ -286,7 +299,8 @@ fn calculate_crossover_pressure_ratio(cas: MetresPerSecond, mach: f64) -> f64 {
 
 /// Calculate the crossover altitude at which the True Air Speeds (TAS)
 /// corresponding to the given Calibrated Air Speed (CAS) and Mach number are
-/// the same.  
+/// the same.
+///
 /// See BADA Rev 3.12, Eq 3.1-27
 /// * `cas` the Calibrated Air Speed in metres per second.
 /// * `mach` the Mach number.

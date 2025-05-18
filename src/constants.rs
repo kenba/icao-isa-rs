@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-//! The ICAO Standard Atmosphere primary constants and characteristics.  
+//! The ICAO Standard Atmosphere primary constants and characteristics.\
 //! See Manual of the ICAO Standard Atmosphere; ICAO Doc 7488/3.
 
 use icao_units::si::{
@@ -55,7 +55,7 @@ pub const SEA_LEVEL_SPEED_OF_SOUND: MetresPerSecond = MetresPerSecond(340.294);
 /// ISA tropopause temperature.
 pub const TROPOPAUSE_TEMPERATURE: Kelvin = Kelvin(216.65);
 
-/// The ISA temperature gradient from Sea level to the tropopause altitude in K/m.  
+/// The ISA temperature gradient from Sea level to the tropopause altitude in K/m.\
 /// AKA Lapse Rate.
 pub const TEMPERATURE_GRADIENT: f64 = -0.0065;
 
