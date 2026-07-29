@@ -330,32 +330,32 @@ mod tests {
             constants::SEA_LEVEL_PRESSURE,
             calculate_isa_pressure(Metres(0.0))
         );
-        assert!(libm::fabs(89874.563 - calculate_isa_pressure(Metres(1000.0)).0) < 0.001);
-        assert!(libm::fabs(79495.201 - calculate_isa_pressure(Metres(2000.0)).0) < 0.001);
-        assert!(libm::fabs(22635.609 - calculate_isa_pressure(Metres(10999.0)).0) < 0.001);
+        assert!((89874.563 - calculate_isa_pressure(Metres(1000.0)).0).abs() < 0.001);
+        assert!((79495.201 - calculate_isa_pressure(Metres(2000.0)).0).abs() < 0.001);
+        assert!((22635.609 - calculate_isa_pressure(Metres(10999.0)).0).abs() < 0.001);
 
         // calculate_tropopause_pressure
         assert_eq!(
             22632.04009500781,
             calculate_isa_pressure(constants::TROPOPAUSE_ALTITUDE).0
         );
-        assert!(libm::fabs(19330.383 - calculate_isa_pressure(Metres(12000.0)).0) < 0.001);
+        assert!((19330.383 - calculate_isa_pressure(Metres(12000.0)).0).abs() < 0.001);
     }
 
     #[test]
     fn test_calculate_isa_altitude() {
         // calculate_troposphere_altitude
         assert_eq!(0.0, calculate_isa_altitude(constants::SEA_LEVEL_PRESSURE).0);
-        assert!(libm::fabs(1000.0 - calculate_isa_altitude(Pascals(89874.563)).0) < 0.001);
-        assert!(libm::fabs(2000.0 - calculate_isa_altitude(Pascals(79495.201)).0) < 0.001);
-        assert!(libm::fabs(10999.0 - calculate_isa_altitude(Pascals(22635.609)).0) < 0.001);
+        assert!((1000.0 - calculate_isa_altitude(Pascals(89874.563)).0).abs() < 0.001);
+        assert!((2000.0 - calculate_isa_altitude(Pascals(79495.201)).0).abs() < 0.001);
+        assert!((10999.0 - calculate_isa_altitude(Pascals(22635.609)).0).abs() < 0.001);
 
         // calculate_tropopause_altitude
         assert_eq!(
             constants::TROPOPAUSE_ALTITUDE.0,
             calculate_isa_altitude(TROPOPAUSE_PRESSURE).0
         );
-        assert!(libm::fabs(12000.0 - calculate_isa_altitude(Pascals(19330.383)).0) < 0.001);
+        assert!((12000.0 - calculate_isa_altitude(Pascals(19330.383)).0).abs() < 0.001);
     }
 
     #[test]
@@ -373,10 +373,10 @@ mod tests {
             calculate_isa_temperature(constants::TROPOPAUSE_ALTITUDE, Kelvin(0.0)).0
         );
         assert!(
-            libm::fabs(
-                constants::TROPOPAUSE_TEMPERATURE.0 + 10.
-                    - calculate_isa_temperature(constants::TROPOPAUSE_ALTITUDE, Kelvin(10.0)).0
-            ) < 1.0e-9
+            (constants::TROPOPAUSE_TEMPERATURE.0 + 10.
+                - calculate_isa_temperature(constants::TROPOPAUSE_ALTITUDE, Kelvin(10.0)).0)
+                .abs()
+                < 1.0e-9
         );
         assert_eq!(
             constants::TROPOPAUSE_TEMPERATURE.0,
@@ -387,72 +387,72 @@ mod tests {
     #[test]
     fn test_calculate_density() {
         assert!(
-            libm::fabs(
-                constants::SEA_LEVEL_DENSITY.0
-                    - calculate_density(
-                        constants::SEA_LEVEL_PRESSURE,
-                        constants::SEA_LEVEL_TEMPERATURE
-                    )
-                    .0
-            ) < 2.0e-8
+            (constants::SEA_LEVEL_DENSITY.0
+                - calculate_density(
+                    constants::SEA_LEVEL_PRESSURE,
+                    constants::SEA_LEVEL_TEMPERATURE
+                )
+                .0)
+                .abs()
+                < 2.0e-8
         );
         assert!(
-            libm::fabs(
-                0.3639176
-                    - calculate_density(TROPOPAUSE_PRESSURE, constants::TROPOPAUSE_TEMPERATURE).0
-            ) < 1.0e-6
+            (0.3639176
+                - calculate_density(TROPOPAUSE_PRESSURE, constants::TROPOPAUSE_TEMPERATURE).0)
+                .abs()
+                < 1.0e-6
         );
     }
 
     #[test]
     fn test_calculate_true_air_speed() {
         assert!(
-            libm::fabs(
-                150.0
-                    - calculate_true_air_speed(
-                        MetresPerSecond(150.0),
-                        constants::SEA_LEVEL_PRESSURE,
-                        constants::SEA_LEVEL_TEMPERATURE
-                    )
-                    .0
-            ) < 1.0e-9
+            (150.0
+                - calculate_true_air_speed(
+                    MetresPerSecond(150.0),
+                    constants::SEA_LEVEL_PRESSURE,
+                    constants::SEA_LEVEL_TEMPERATURE
+                )
+                .0)
+                .abs()
+                < 1.0e-9
         );
         assert!(
-            libm::fabs(
-                164.458
-                    - calculate_true_air_speed(
-                        MetresPerSecond(150.0),
-                        Pascals(79495.201),
-                        Kelvin(constants::SEA_LEVEL_TEMPERATURE.0 - 13.0)
-                    )
-                    .0
-            ) < 0.001
+            (164.458
+                - calculate_true_air_speed(
+                    MetresPerSecond(150.0),
+                    Pascals(79495.201),
+                    Kelvin(constants::SEA_LEVEL_TEMPERATURE.0 - 13.0)
+                )
+                .0)
+                .abs()
+                < 0.001
         );
     }
 
     #[test]
     fn test_calculate_calibrated_air_speed() {
         assert!(
-            libm::fabs(
-                150.0
-                    - calculate_calibrated_air_speed(
-                        MetresPerSecond(150.0),
-                        constants::SEA_LEVEL_PRESSURE,
-                        constants::SEA_LEVEL_TEMPERATURE
-                    )
-                    .0
-            ) < 1.0e-9
+            (150.0
+                - calculate_calibrated_air_speed(
+                    MetresPerSecond(150.0),
+                    constants::SEA_LEVEL_PRESSURE,
+                    constants::SEA_LEVEL_TEMPERATURE
+                )
+                .0)
+                .abs()
+                < 1.0e-9
         );
         assert!(
-            libm::fabs(
-                150.0
-                    - calculate_calibrated_air_speed(
-                        MetresPerSecond(164.458),
-                        Pascals(79495.201),
-                        Kelvin(constants::SEA_LEVEL_TEMPERATURE.0 - 13.0)
-                    )
-                    .0
-            ) < 0.001
+            (150.0
+                - calculate_calibrated_air_speed(
+                    MetresPerSecond(164.458),
+                    Pascals(79495.201),
+                    Kelvin(constants::SEA_LEVEL_TEMPERATURE.0 - 13.0)
+                )
+                .0)
+                .abs()
+                < 0.001
         );
     }
 
@@ -460,24 +460,24 @@ mod tests {
     fn test_speed_of_sound() {
         assert_eq!(0.0, speed_of_sound(Kelvin(0.0)).0);
         assert!(
-            libm::fabs(
-                constants::SEA_LEVEL_SPEED_OF_SOUND.0
-                    - speed_of_sound(constants::SEA_LEVEL_TEMPERATURE).0
-            ) < 0.001
+            (constants::SEA_LEVEL_SPEED_OF_SOUND.0
+                - speed_of_sound(constants::SEA_LEVEL_TEMPERATURE).0)
+                .abs()
+                < 0.001
         );
-        assert!(libm::fabs(295.070 - speed_of_sound(constants::TROPOPAUSE_TEMPERATURE).0) < 0.001);
+        assert!((295.070 - speed_of_sound(constants::TROPOPAUSE_TEMPERATURE).0).abs() < 0.001);
     }
 
     #[test]
     fn test_mach_true_air_speed() {
         assert!(
-            libm::fabs(
-                0.8 * constants::SEA_LEVEL_SPEED_OF_SOUND.0
-                    - mach_true_air_speed(0.8, constants::SEA_LEVEL_TEMPERATURE).0
-            ) < 0.001
+            (0.8 * constants::SEA_LEVEL_SPEED_OF_SOUND.0
+                - mach_true_air_speed(0.8, constants::SEA_LEVEL_TEMPERATURE).0)
+                .abs()
+                < 0.001
         );
         assert!(
-            libm::fabs(250.809 - mach_true_air_speed(0.85, constants::TROPOPAUSE_TEMPERATURE).0)
+            (250.809 - mach_true_air_speed(0.85, constants::TROPOPAUSE_TEMPERATURE).0).abs()
                 < 0.001
         );
     }
@@ -486,13 +486,13 @@ mod tests {
     fn test_calculate_crossover_altitude() {
         let cas = MetresPerSecond(155.0);
         let crossover_altitude = calculate_crossover_altitude(cas, 0.79);
-        assert!(libm::fabs(9070.814 - crossover_altitude.0) < 0.001);
+        assert!((9070.814 - crossover_altitude.0).abs() < 0.001);
 
         // The TAS should be the same from both CAS and MACH at the crossover_altitude
         let pressure = calculate_isa_pressure(crossover_altitude);
         let temperature = calculate_isa_temperature(crossover_altitude, Kelvin(0.0));
         let tas_from_cas = calculate_true_air_speed(cas, pressure, temperature);
         let tas_from_mach = mach_true_air_speed(0.79, temperature);
-        assert!(libm::fabs(tas_from_cas.0 - tas_from_mach.0) < 0.001);
+        assert!((tas_from_cas.0 - tas_from_mach.0).abs() < 0.001);
     }
 }
