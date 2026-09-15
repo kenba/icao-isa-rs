@@ -288,6 +288,33 @@ pub fn calculate_isa_temperature<T: Float>(
     }
 }
 
+/// Estimate the altitude difference (pressure alttiude - geopotential altitude)
+/// for a difference in ISA temperature at a given altitude and reference elevation.
+///
+/// It assumes a linear variation of temperature with height.
+/// It produces results within 5 per cent of the accurate correction for
+/// reference elevations up to 3000m and altitudes up to 1500m above the reference.
+/// See ICAO Doc 8168 Volume I, Part III Section 4.3.3.
+///
+/// * `altitude` the barometric altitude in `Metres`.
+/// * `delta_temperature` the difference from ISA temperature at Sea level.
+/// * `ref_elevation` the reference elevation (usually aerodrome) in `Metres`.
+///
+/// returns the altitude difference in Metres.
+#[must_use]
+pub fn estimate_temperature_correction_delta_altitude<T: Float>(
+    altitude: Metres<T>,
+    delta_temperature: Kelvin<T>,
+    ref_elevation: Metres<T>,
+) -> Metres<T> {
+    let delta_altitude = altitude - ref_elevation;
+    let denominator = delta_temperature.0
+        + isa_sea_level_temperature().0
+        + altitude.half().0 * isa_temperature_gradient();
+
+    Metres::<T>(delta_altitude.0 * -delta_temperature.0 / denominator)
+}
+
 /// Calculate the air density given the air temperature and pressure.\
 /// Uses the Ideal Gas Equation (Boyles law)
 ///
@@ -424,6 +451,7 @@ pub fn calculate_crossover_altitude<T: Float>(cas: MetresPerSecond<T>, mach: T) 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use icao_units::non_si::Feet;
 
     #[test]
     fn test_constant_functions() {
@@ -497,6 +525,109 @@ mod tests {
         assert_eq!(
             constants::ISA_TROPOPAUSE_TEMPERATURE,
             calculate_isa_temperature(Metres(12000.0), Kelvin(-10.0)).0
+        );
+    }
+
+    #[test]
+    fn test_estimate_temperature_correction_delta_altitude() {
+        // Test values from Eurocae ED-323, Appendoix H, Table H-2
+        let five_thousand_feet_m = Metres::from(Feet(5000.0));
+        let ten_thousand_feet_m = Metres::from(Feet(10000.0));
+        let fifteen_thousand_feet_m = ten_thousand_feet_m + five_thousand_feet_m;
+
+        // ISA temperature, Sea Level
+        assert_eq!(
+            0.0,
+            estimate_temperature_correction_delta_altitude(
+                five_thousand_feet_m,
+                Kelvin(0.0),
+                Metres(0.0)
+            )
+            .0
+        );
+
+        // aircaft 5000ft above Sea Level
+        assert_eq!(
+            // -405
+            -405.58473963082054,
+            Feet::from(estimate_temperature_correction_delta_altitude(
+                five_thousand_feet_m,
+                Kelvin(25.0),
+                Metres(0.0)
+            ))
+            .0
+        );
+
+        // aircaft 5000ft above Sea Level
+        assert_eq!(
+            // 280
+            279.6451861877649,
+            Feet::from(estimate_temperature_correction_delta_altitude(
+                five_thousand_feet_m,
+                Kelvin(-15.0),
+                Metres(0.0)
+            ))
+            .0
+        );
+
+        // airfield at 5000ft
+        // airrcaft at airfield elevation
+        assert_eq!(
+            0.0,
+            estimate_temperature_correction_delta_altitude(
+                five_thousand_feet_m,
+                Kelvin(34.9),
+                five_thousand_feet_m
+            )
+            .0
+        );
+
+        // airrcaft 5000ft above airfield elevation
+        assert_eq!(
+            // -565.0,
+            -557.251615870015,
+            Feet::from(estimate_temperature_correction_delta_altitude(
+                ten_thousand_feet_m,
+                Kelvin(34.9),
+                five_thousand_feet_m
+            ))
+            .0
+        );
+
+        // airrcaft 5000ft above airfield elevation
+        assert_eq!(
+            // 398.0,
+            389.31759018222397,
+            Feet::from(estimate_temperature_correction_delta_altitude(
+                ten_thousand_feet_m,
+                Kelvin(-20.1),
+                five_thousand_feet_m
+            ))
+            .0
+        );
+
+        // airrcaft 10000ft above airfield elevation
+        assert_eq!(
+            // -1147.0
+            -1132.414638973883,
+            Feet::from(estimate_temperature_correction_delta_altitude(
+                fifteen_thousand_feet_m,
+                Kelvin(34.9),
+                five_thousand_feet_m
+            ))
+            .0
+        );
+
+        // airrcaft 10000ft above airfield elevation
+        assert_eq!(
+            // 813.0,
+            793.8670805834332,
+            Feet::from(estimate_temperature_correction_delta_altitude(
+                fifteen_thousand_feet_m,
+                Kelvin(-20.1),
+                five_thousand_feet_m
+            ))
+            .0
         );
     }
 
