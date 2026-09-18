@@ -315,6 +315,84 @@ pub fn estimate_temperature_correction_delta_altitude<T: Float>(
     Metres::<T>(delta_altitude.0 * -delta_temperature.0 / denominator)
 }
 
+/// Calculate the altitude difference (pressure altitude - geopotential altitude)
+/// for a difference in ISA temperature at a given altitude and reference elevation.
+///
+/// See: RTCA DO-283C/Eurocae ED-323, December 2024 Appendix H Section H.2.4.
+///
+/// * `altitude` the barometric altitude in `Metres`.
+/// * `delta_temperature` the difference from ISA temperature at Sea level.
+/// * `ref_elevation` the reference elevation (usually aerodrome) in `Metres`.
+///
+/// returns the altitude difference in Metres.
+fn accurate_temperature_correction<T: Float>(
+    altitude: Metres<T>,
+    delta_temperature: Kelvin<T>,
+    ref_elevation: Metres<T>,
+) -> Metres<T> {
+    let temp_ratio = altitude.0 * isa_temperature_gradient()
+        / (ref_elevation.0 * isa_temperature_gradient() + isa_sea_level_temperature().0);
+    let ln_temp_ratio = (T::one() + temp_ratio).ln();
+    Metres::<T>((-delta_temperature.0 / isa_temperature_gradient()) * ln_temp_ratio)
+}
+
+/// Calculate the altitude difference (pressure altitude - geopotential altitude)
+/// for a difference in ISA temperature at a given altitude and reference elevation.
+///
+/// See: RTCA DO-283C/Eurocae ED-323, December 2024 Appendix H Section H.2.4.
+/// and  ICAO Doc 8168 Volume II, Seventh Edition (2020).
+///
+/// Note: the equation in ICAO Doc 8168 Volume I Fifth Edition (2006),
+/// Part III Section 4.3.4 is incorrect.
+///
+/// * `altitude` the barometric altitude in `Metres`.
+/// * `delta_temperature` the difference from ISA temperature at Sea level.
+/// * `ref_elevation` the reference elevation (usually aerodrome) in `Metres`.
+/// * `iteration_tolerance` the tolerance of the result in `Metres`.
+///
+/// returns the altitude difference in Metres.
+#[must_use]
+pub fn calculate_temperature_correction_delta_altitude<T: Float>(
+    altitude: Metres<T>,
+    delta_temperature: Kelvin<T>,
+    ref_elevation: Metres<T>,
+    iteration_tolerance: Metres<T>,
+) -> (Metres<T>, u32) {
+    // The maximum number of iterations to attempt.
+    const MAX_ITERS: u32 = 10;
+
+    let delta_altitude = altitude - ref_elevation;
+    let initial_value =
+        accurate_temperature_correction(delta_altitude, delta_temperature, ref_elevation);
+    if initial_value.abs() < iteration_tolerance {
+        // the initial_value is within tolerance
+        (initial_value, 0)
+    } else {
+        // iterate to find the altitude difference
+        let mut value = initial_value;
+        let mut iterations: u32 = 1;
+        for i in 1..=MAX_ITERS {
+            iterations = i;
+
+            // calculate the value by adding the previous_value to the geo-potential altitude
+            let previous_value = value;
+            value = accurate_temperature_correction(
+                delta_altitude + previous_value,
+                delta_temperature,
+                ref_elevation,
+            );
+
+            // determine whether the value is within tolerance
+            let delta = value - previous_value;
+            if delta.abs() < iteration_tolerance {
+                break;
+            }
+        }
+
+        (value, iterations)
+    }
+}
+
 /// Calculate the air density given the air temperature and pressure.\
 /// Uses the Ideal Gas Equation (Boyles law)
 ///
@@ -530,7 +608,7 @@ mod tests {
 
     #[test]
     fn test_estimate_temperature_correction_delta_altitude() {
-        // Test values from Eurocae ED-323, Appendoix H, Table H-2
+        // Test values from Eurocae ED-323, Appendix H, Table H-2
         let five_thousand_feet_m = Metres::from(Feet(5000.0));
         let ten_thousand_feet_m = Metres::from(Feet(10000.0));
         let fifteen_thousand_feet_m = ten_thousand_feet_m + five_thousand_feet_m;
@@ -546,7 +624,7 @@ mod tests {
             .0
         );
 
-        // aircaft 5000ft above Sea Level
+        // aircraft 5000ft above Sea Level
         assert_eq!(
             // -405
             -405.58473963082054,
@@ -558,7 +636,7 @@ mod tests {
             .0
         );
 
-        // aircaft 5000ft above Sea Level
+        // aircraft 5000ft above Sea Level
         assert_eq!(
             // 280
             279.6451861877649,
@@ -571,7 +649,7 @@ mod tests {
         );
 
         // airfield at 5000ft
-        // airrcaft at airfield elevation
+        // aircraft at airfield elevation
         assert_eq!(
             0.0,
             estimate_temperature_correction_delta_altitude(
@@ -582,7 +660,7 @@ mod tests {
             .0
         );
 
-        // airrcaft 5000ft above airfield elevation
+        // aircraft 5000ft above airfield elevation
         assert_eq!(
             // -565.0,
             -557.251615870015,
@@ -594,7 +672,7 @@ mod tests {
             .0
         );
 
-        // airrcaft 5000ft above airfield elevation
+        // aircraft 5000ft above airfield elevation
         assert_eq!(
             // 398.0,
             389.31759018222397,
@@ -606,7 +684,7 @@ mod tests {
             .0
         );
 
-        // airrcaft 10000ft above airfield elevation
+        // aircraft 10000ft above airfield elevation
         assert_eq!(
             // -1147.0
             -1132.414638973883,
@@ -618,7 +696,7 @@ mod tests {
             .0
         );
 
-        // airrcaft 10000ft above airfield elevation
+        // aircraft 10000ft above airfield elevation
         assert_eq!(
             // 813.0,
             793.8670805834332,
@@ -629,6 +707,175 @@ mod tests {
             ))
             .0
         );
+    }
+
+    #[test]
+    fn test_calculate_temperature_correction_delta_altitude() {
+        // Test values from Eurocae ED-323, Appendix H, Table H-2
+        let tolerance = Metres::from(Feet(0.5));
+        let five_thousand_feet_m = Metres::from(Feet(5000.0));
+        let ten_thousand_feet_m = Metres::from(Feet(10000.0));
+        let fifteen_thousand_feet_m = ten_thousand_feet_m + five_thousand_feet_m;
+
+        // ISA temperature, Sea Level
+        let result = calculate_temperature_correction_delta_altitude(
+            five_thousand_feet_m,
+            Kelvin(0.0),
+            Metres(0.0),
+            tolerance,
+        );
+        assert_eq!(0.0, result.0.0);
+        assert_eq!(0, result.1);
+
+        // aircraft 5000ft above Sea Level
+        let result = calculate_temperature_correction_delta_altitude(
+            five_thousand_feet_m,
+            Kelvin(25.0),
+            Metres(0.0),
+            tolerance,
+        );
+        // -405
+        assert_eq!(-405.06317867613643, Feet::from(result.0).0);
+        assert_eq!(3, result.1);
+
+        // aircraft 5000ft above Sea Level
+        let result = calculate_temperature_correction_delta_altitude(
+            five_thousand_feet_m,
+            Kelvin(-15.0),
+            Metres(0.0),
+            tolerance,
+        );
+        // 280
+        assert_eq!(279.9659630039626, Feet::from(result.0).0);
+        assert_eq!(3, result.1);
+
+        // airfield at 5000ft
+        // aircraft at airfield elevation
+        let result = calculate_temperature_correction_delta_altitude(
+            five_thousand_feet_m,
+            Kelvin(34.9),
+            five_thousand_feet_m,
+            tolerance,
+        );
+        assert_eq!(0.0, result.0.0);
+        assert_eq!(0, result.1);
+
+        // aircraft 5000ft above airfield elevation
+        let result = calculate_temperature_correction_delta_altitude(
+            ten_thousand_feet_m,
+            Kelvin(34.9),
+            five_thousand_feet_m,
+            tolerance,
+        );
+        // -565.0,
+        assert_eq!(-565.2441666260803, Feet::from(result.0).0);
+        assert_eq!(4, result.1);
+
+        // aircraft 5000ft above airfield elevation
+        let result = calculate_temperature_correction_delta_altitude(
+            ten_thousand_feet_m,
+            Kelvin(-20.1),
+            five_thousand_feet_m,
+            tolerance,
+        );
+        // 398.0,
+        assert_eq!(397.5942649912749, Feet::from(result.0).0);
+        assert_eq!(3, result.1);
+
+        // aircraft 10000ft above airfield elevation
+        let result = calculate_temperature_correction_delta_altitude(
+            fifteen_thousand_feet_m,
+            Kelvin(34.9),
+            five_thousand_feet_m,
+            tolerance,
+        );
+        // -1147.0
+        assert_eq!(-1147.0230542873655, Feet::from(result.0).0);
+        assert_eq!(4, result.1);
+
+        // aircraft 10000ft above airfield elevation
+        let result = calculate_temperature_correction_delta_altitude(
+            fifteen_thousand_feet_m,
+            Kelvin(-20.1),
+            five_thousand_feet_m,
+            tolerance,
+        );
+        // 813.0
+        assert_eq!(812.7810663120495, Feet::from(result.0).0);
+        assert_eq!(3, result.1);
+    }
+
+    #[test]
+    fn test_extreme_calculate_temperature_correction_delta_altitude() {
+        // Test values from Eurocae ED-323, Appendix H, Table H-2
+        let tolerance = Metres::from(Feet(0.5));
+        let five_thousand_feet_m = Metres::from(Feet(5000.0));
+        let ten_thousand_feet_m = Metres::from(Feet(10000.0));
+        let fifteen_thousand_feet_m = ten_thousand_feet_m + five_thousand_feet_m;
+
+        // aircraft 5000ft above Sea Level
+        let result = calculate_temperature_correction_delta_altitude(
+            five_thousand_feet_m,
+            Kelvin(-75.0),
+            Metres(0.0),
+            tolerance,
+        );
+        assert_eq!(1817.309419189496, Feet::from(result.0).0);
+        assert_eq!(7, result.1);
+
+        // aircraft 10000ft above Sea Level
+        let result = calculate_temperature_correction_delta_altitude(
+            ten_thousand_feet_m,
+            Kelvin(-75.0),
+            Metres(0.0),
+            tolerance,
+        );
+        assert_eq!(3763.1848079992023, Feet::from(result.0).0);
+        assert_eq!(7, result.1);
+
+        // airfield at 5000ft
+        // aircraft 5000ft above airfield elevation
+        let result = calculate_temperature_correction_delta_altitude(
+            ten_thousand_feet_m,
+            Kelvin(-65.1),
+            five_thousand_feet_m,
+            tolerance,
+        );
+        assert_eq!(1575.5914800770904, Feet::from(result.0).0);
+        assert_eq!(6, result.1);
+
+        // aircraft 10000ft above airfield elevation
+        let result: (Metres<f64>, u32) = calculate_temperature_correction_delta_altitude(
+            fifteen_thousand_feet_m,
+            Kelvin(-65.1),
+            five_thousand_feet_m,
+            tolerance,
+        );
+        assert_eq!(3258.305027750856, Feet::from(result.0).0);
+        assert_eq!(7, result.1);
+
+        // airfield at 10000ft
+        // aircraft 5000ft above airfield elevation
+        let result = calculate_temperature_correction_delta_altitude(
+            fifteen_thousand_feet_m + five_thousand_feet_m,
+            Kelvin(-45.3),
+            fifteen_thousand_feet_m,
+            tolerance,
+        );
+        // 1094
+        assert_eq!(1093.9114246575625, Feet::from(result.0).0);
+        assert_eq!(5, result.1);
+
+        // aircraft 10000ft above airfield elevation
+        let result: (Metres<f64>, u32) = calculate_temperature_correction_delta_altitude(
+            fifteen_thousand_feet_m + ten_thousand_feet_m,
+            Kelvin(-45.3),
+            fifteen_thousand_feet_m,
+            tolerance,
+        );
+        // 2256
+        assert_eq!(2255.9545391922147, Feet::from(result.0).0);
+        assert_eq!(5, result.1);
     }
 
     #[test]
