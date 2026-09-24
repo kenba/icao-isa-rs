@@ -46,7 +46,7 @@
 
 pub mod constants;
 
-use icao_units::si::{
+pub use icao_units::si::{
     Kelvin, KilogramsPerCubicMetre, Metres, MetresPerSecond, MetresPerSecondSquared, Pascals,
 };
 use num_traits::Float;
